@@ -1,4 +1,5 @@
-import Test
+from Test import Test
+
 
 class TestSupplier:
     testList = []

@@ -3,8 +3,9 @@ import sys
 from PyQt5 import uic
 from TestSupplier import TestSupplier
 from WarningDialog import WarningDialog
+from IntroDialog import IntroDialog
 from Diagram import Diagram
-from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QPushButton, QLabel
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel
 from PyQt5.QtCore import QPoint
 
 class MyWidget(QMainWindow):
@@ -12,15 +13,25 @@ class MyWidget(QMainWindow):
     testList = []
     r_answer_count= 0
     n = 0
+    user_data = None
 
     def __init__(self):
         super().__init__()
-        uic.loadUi('main.ui', self)
-        self.testList = TestSupplier().getTestList()
-        self.run_test()
-        self.next_button.clicked.connect(self.next)
-        self.back_button.clicked.connect(self.back)
-        self.end_button.setVisible(False)
+        self.show_intro()
+        if self.user_data:
+            uic.loadUi('main.ui', self)
+            self.testList = TestSupplier().getTestList()
+            self.run_test()
+            self.next_button.clicked.connect(self.next)
+            self.back_button.clicked.connect(self.back)
+            self.end_button.setVisible(False)
+        else:
+            exit()
+
+    def show_intro(self):
+        #TODO сделать координаты в центре
+        coords = QPoint(self.mapToGlobal(QPoint(0,0)))
+        self.user_data = IntroDialog(coords.x(), coords.y()).render_dialog()
 
     def run_test(self):
         self.setWindowTitle('Программа тестирования')

@@ -3,6 +3,7 @@ import sys
 from PyQt5 import uic
 from TestSupplier import TestSupplier
 from WarningDialog import WarningDialog
+from IntroDialog import IntroDialog
 from Diagram import Diagram
 from PyQt5.QtWidgets import QApplication, QMainWindow, QDialog, QPushButton, QLabel
 from PyQt5.QtCore import QPoint
@@ -16,11 +17,17 @@ class MyWidget(QMainWindow):
     def __init__(self):
         super().__init__()
         uic.loadUi('main.ui', self)
+        self.show_intro()
         self.testList = TestSupplier().getTestList()
         self.run_test()
         self.next_button.clicked.connect(self.next)
         self.back_button.clicked.connect(self.back)
         self.end_button.setVisible(False)
+
+    def show_intro(self):
+        coords = QPoint(self.mapToGlobal(QPoint(0,0)))
+        IntroDialog(coords.x(), coords.y()).render_dialog()
+        # TODO Запустить новое окно по аналогии с warning логин пароль ссылка на регистрацию
 
     def run_test(self):
         self.setWindowTitle('Программа тестирования')

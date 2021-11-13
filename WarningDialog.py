@@ -26,7 +26,8 @@ class WarningDialog:
         dialog.cancel_button.move(200, 60)
         dialog.label = QLabel(dialog)
         dialog.label.setText(self.answer)
-        dialog.label.move(30, 20)
+        dialog.label.resize(300, 30)
+        dialog.label.move(10, 20)
 
         dialog.ok_button.clicked.connect(self.ok)
         dialog.cancel_button.clicked.connect(self.cancel)

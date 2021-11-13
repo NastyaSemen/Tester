@@ -2,7 +2,7 @@ from PyQt5.QtWidgets import QDialog, QPushButton, QLabel, QLineEdit
 from Registration import Registration
 from PyQt5.QtCore import QPoint
 import psycopg2
-
+from userdata.UserDataSupplier import UserDataSupplier
 
 class IntroDialog:
 
@@ -10,6 +10,7 @@ class IntroDialog:
     y = 0
     result = False
     dialog = None
+    user_data = None
 
     def __init__(self, x, y):
         self.x = x
@@ -48,13 +49,22 @@ class IntroDialog:
         dialog.sign_up.move(10, 200)
         dialog.sign_up.resize(130, 25)
         dialog.sign_up.clicked.connect(self.sign_up)
-
         dialog.exec()
-        return self.result
+        return self.user_data
 
     def check_password(self):
         login = self.dialog.login_input.text()
         psw = self.dialog.password_input.text()
+        result = UserDataSupplier().get_user_data(login, psw)
+        if result[0]:
+            self.dialog.info.setText('')
+            self.user_data = result[0]
+            self.dialog.close()
+        else:
+            self.render_error(result[1])
+
+    def render_error(self, error_text):
+        self.dialog.info.setText(error_text)
 
 
     def sign_up(self):

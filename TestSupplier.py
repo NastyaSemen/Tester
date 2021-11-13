@@ -12,4 +12,3 @@ class TestSupplier:
 
     def getTestList(self):
         return self.testList
-

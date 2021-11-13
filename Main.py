@@ -2,24 +2,39 @@ import sys
 
 from PyQt5 import uic
 from TestSupplier import TestSupplier
-from PyQt5.QtWidgets import QApplication, QMainWindow
-
+from WarningDialog import WarningDialog
+from IntroDialog import IntroDialog
+from Diagram import Diagram
+from PyQt5.QtWidgets import QApplication, QMainWindow, QPushButton, QLabel
+from PyQt5.QtCore import QPoint
 
 class MyWidget(QMainWindow):
 
     testList = []
+    r_answer_count= 0
     n = 0
+    user_data = None
 
     def __init__(self):
         super().__init__()
-        self.setWindowTitle('Программа тестирования')
-        uic.loadUi('main.ui', self)
-        self.testList = TestSupplier().getTestList()
-        self.run_test()
-        self.next_button.clicked.connect(self.next)
-        self.back_button.clicked.connect(self.back)
+        self.show_intro()
+        if self.user_data:
+            uic.loadUi('main.ui', self)
+            self.testList = TestSupplier().getTestList()
+            self.run_test()
+            self.next_button.clicked.connect(self.next)
+            self.back_button.clicked.connect(self.back)
+            self.end_button.setVisible(False)
+        else:
+            exit()
+
+
+    def show_intro(self):
+        coords = QPoint(self.mapToGlobal(QPoint(0,0)))
+        self.user_data = IntroDialog(coords.x(), coords.y()).render_dialog()
 
     def run_test(self):
+        self.setWindowTitle('Программа тестирования')
         self.render_test_count()
         self.render_buttons()
         test = self.testList[self.n]
@@ -51,8 +66,92 @@ class MyWidget(QMainWindow):
             self.back_button.setVisible(True)
         if self.n + 1 == len(self.testList):
             self.next_button.setVisible(False)
+            self.next_button.setEnabled(False)
+            self.end_button.setVisible(True)
+            self.end_button.setEnabled(True)
+            self.end_button.setText('Итог')
+            self.end_button.clicked.connect(self.itog)
         else:
             self.next_button.setVisible(True)
+            self.next_button.setEnabled(True)
+            self.end_button.setVisible(False)
+            self.end_button.setEnabled(False)
+
+    def itog(self):
+        test = self.testList[self.n]
+        test.setAnswer(self.answer_input.toPlainText())
+        coords = QPoint(self.mapToGlobal(QPoint(0,0)))
+        text_output = self.user_data.get_first_name() + ' ' + self.user_data.get_second_name() + ', вы хотитете завершить?'
+        result = self.render_dialog("Предупреждение!", text_output, coords.x(), coords.y())
+        if result:
+            self.prepare_itog_widget()
+
+    def prepare_itog_widget(self):
+        self.clear_widget()
+        self.setWindowTitle('Подведение итога')
+        self.q_label.setText('')
+        rgth = 0
+        for test in self.testList:
+            if test.check():
+                rgth += 1
+        self.r_answer_count = rgth
+
+        name = self.user_data.get_first_name() + ' ' + self.user_data.get_second_name()
+        itog_label = ', вы завершили тестирование'
+        self.q_label.setText(name + itog_label)
+        self.q_label.move(10, 80)
+        self.q_label.resize(350, 30)
+
+        self.show_diagram_button = QPushButton(self)
+        self.show_diagram_button.setText('Диаграмма')
+        self.show_diagram_button.move(300, 10)
+        self.show_diagram_button.resize(100, 30)
+        self.show_diagram_button.show()
+
+        self.show_diagram_button.clicked.connect(self.show_diagrama)
+
+        self.result_label = QLabel(self)
+        self.result_label.setText('Выполненно правильно - ' + str(self.r_answer_count))
+        self.result_label.resize(200, 30)
+        self.result_label.move(10, 150)
+        self.result_label.show()
+
+        self.end_testing = QPushButton('Завершить тестирование', self)
+        self.end_testing.move(200, 250)
+        self.end_testing.resize(190, 30)
+        self.end_testing.show()
+
+        self.menu_button = QPushButton('Вернуться в меню', self)
+        self.menu_button.move(10, 250)
+        self.menu_button.resize(150, 30)
+        self.menu_button.show()
+
+    def show_diagrama(self):
+        if len(self.testList) == self.r_answer_count:
+            Diagram().show([self.r_answer_count], ['Правильно'])
+        elif self.r_answer_count == 0:
+            Diagram().show([len(self.testList)], ['Неверно'])
+        else:
+            Diagram().show([self.r_answer_count, len(self.testList) - self.r_answer_count])
+
+    def render_dialog(self, title, answer, x, y):
+        dialog = WarningDialog(title, answer, x, y)
+        result = dialog.render_dialog()
+        return result
+
+    def clear_widget(self):
+        self.next_button.setVisible(False)
+        self.next_button.setEnabled(False)
+        self.end_button.setVisible(False)
+        self.end_button.setEnabled(False)
+        self.count_label.setVisible(False)
+        self.count_label.setEnabled(False)
+        self.answer_input.setVisible(False)
+        self.answer_input.setEnabled(False)
+        self.c_label.setVisible(False)
+        self.c_label.setEnabled(False)
+        self.back_button.setVisible(False)
+        self.back_button.setEnabled(False)
 
 
 if __name__ == '__main__':

@@ -8,6 +8,8 @@ class UserDataSupplier:
         self.db_config = self.config()
 
     def get_user_data(self, login, password):
+        return tuple([UserData("Виктория", "Новикова"), ""])
+        # TODO для проверки отключено подключение к БД
         conn = self.get_connection()
         cur = conn.cursor()
         cur.execute("SELECT first_name, second_name FROM user_info WHERE login='{0}' and password = '{1}';".format(login, password))
